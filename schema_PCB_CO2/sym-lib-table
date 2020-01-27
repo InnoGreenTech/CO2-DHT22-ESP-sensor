@@ -1,0 +1,3 @@
+(sym_lib_table
+  (lib (name schema_PCP_CO2-rescue)(type Legacy)(uri ${KIPRJMOD}/schema_PCP_CO2-rescue.lib)(options "")(descr ""))
+)
