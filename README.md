@@ -6,7 +6,7 @@ Description:
 
 This is a MH-Z19B, CO2 sensor, a DHT22, humidity and temperature sensor; connected at a nodemcu with a oled screen.
 
-It have a interface web and an update by http interface.
+It have a interface web and an update by http interface. It is possible to connect it in Modbus.
 
 [*You can found more information on my web site on this page*](http://innogreentech.fr/en/connected-objects/measures/62-co2-temperature-and-humidity-sensor)
 
