@@ -1,11 +1,16 @@
 
 void indexRoot(){
               if ( serverhttp.hasArg("envoi")) 
-              {      
-                send_data();
-              } 
-               serverhttp.send ( 200, "text/html", indexPage() );   // envoi de la page
+                {      
+                  send_data();
+                } 
+              if (serverhttp.hasArg("commande"))
+                {
+                   consigne=serverhttp.arg("commande")[0];
                 }
+              
+               serverhttp.send ( 200, "text/html", indexPage() );   // envoi de la page
+               }
   
 
 
@@ -14,7 +19,7 @@ String indexPage(){
                            page +=F("<body>");
                            page +=F("<nav> <ul id='menu'><li><a href='index.html'> Accueil </a></li><li><a href='reglage.html'> Réglages </a></li><li><a href='mail.html'> Mails </a> </li></ul></nav>");
                            page +=F("<div id='page'>");
-                           page +=F("<header><h1>Centrale MINIATURE </h1></header>");
+                           page +=F("<header><h1>Centrale Qualité </h1></header>");
                            page +=F("<div id='corp'>");
                            page +=F("<section id='datedujour'><h2>");
                            page +=NTP.getDateStr();
@@ -32,14 +37,26 @@ String indexPage(){
                            page +=F("</li></ul></section>");
                            page +=F("<section id='capteur1'><h2> Capteur CO2 </h2><ul><li>Température:");
                            page +=temperature;
-                           page +=F("</li><li> Delai envoi:");
-                           page +=millisecondes;
+                           page +=F("</li><li>Humidité:");
+                           page +=humidity;
+                           page +=F("</li><li> CO2:");
+                           page +=co2;
+                           page +=F("</li><li>Délai d'envoi:");
+                           page +=millisecondes/1000;
                            page +=F("</li><li> Validation envoi:");
                            page +=enableServer;
                            page +=F("</li><li><form method='get'><input type='hidden' name='envoi' value='1'/><input type='submit' value='envoi'/>");                      
                            page +=F("</form></li></ul></section>");
+                           page +=F("<section id='Calibration'><h2> Clalibration CO2 </h2><ul><li>z pour calibrer le zéro");
+                           page +=F("</li><li>i pour passer en auto calibration");
+                           page +=F("</li><li>c pour passer en calibration manuel");
+                           page +=F("</li><li>m pour effectuer une mesure ");
+                           page +=F("</li><li></li><li><form method='get'>");
+                           page +=F("<input type='text' name='commande'/>");  
+                           page +=F("</li><li><input type='hidden' name='envoi' value='1'/></li><li><input type='submit' value='envoi'/>");                      
+                           page +=F("</form></li></ul></section>");
                            page +=F("</div>");
-                           page +=F("<footer><a href='http://Innogreentech.fr'>InnoGreenTech</a><a href='mailto: info@innogreentech.fr'>Contactez moi</a></footer>");
+                           page +=F("<footer><a href='http://www.Innogreentech.com'>InnoGreenTech</a><a href='mailto: fabricebaudin@outlook.fr'>Contactez moi</a></footer>");
                            page +=F("</div></body></html>");                  
                            return page;
                           }

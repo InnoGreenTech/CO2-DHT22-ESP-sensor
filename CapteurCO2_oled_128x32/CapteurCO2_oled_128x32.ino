@@ -1,6 +1,11 @@
 /* library system*/
 #include <SPI.h>
 #include <stdio.h>
+#include <ArduinoJson.h>
+#include <Wire.h>
+#include <EEPROM.h>
+#include <ESP8266WiFi.h>
+#include <wchar.h>
 #include <WString.h>
 #include <ESP8266HTTPClient.h>
 #include <ESP8266WebServer.h>
@@ -11,11 +16,6 @@
 #include <DHT.h>
 
 /* use to enable sleep mode */
-#include <ArduinoJson.h>
-#include <Wire.h>
-#include <EEPROM.h>
-#include <ESP8266WiFi.h>
-#include <wchar.h>
 
 extern "C" {
 #include "user_interface.h"
@@ -70,13 +70,10 @@ String        local_mac;             // adress mac of the module
 String        local_ip;              // adress ip of module
 byte          enableServer = 1 ;     // Use to control if the parameters are good
 
-unsigned long refreshScreen=0;       //permet de d'actualiser les lectures de températures et l'écran
-#define REFRESHSCREEN 5000
-
 
 String        reception;             // To read information
 int           code;                  // Variable code pour l'échange d'information
-int           consigne='m';
+int           consigne='c';
 String        ssid = "";
 String        password = "";
 int           config_mode = 0;
@@ -86,6 +83,7 @@ unsigned long delay_reboot;         // delay during the page of connection is op
 
 ESP8266WebServer serverhttp(80);
 
+
 /* Configuration of screen */
 
 #include <Adafruit_GFX.h>
@@ -93,12 +91,20 @@ ESP8266WebServer serverhttp(80);
 
 // SCL GPIO5
 // SDA GPIO4
-#define OLED_RESET 0  // GPIO0
+#define OLED_RESET 0
 Adafruit_SSD1306 display(OLED_RESET);
 
-#if (SSD1306_LCDHEIGHT != 48)
+#define NUMFLAKES 10
+#define XPOS 0
+#define YPOS 1
+#define DELTAY 2
+
+#if (SSD1306_LCDHEIGHT != 64)
 #error("Height incorrect, please fix Adafruit_SSD1306.h!");
 #endif
+
+unsigned long refreshScreen;      // taux de rafraîchissement de l'écran
+#define REFRESH 8000
 
 /* config update server*/
 
@@ -156,10 +162,10 @@ int nb_cycle_lost_wifi=0;
 void setup()
 {
   Serial.begin(115200);
-
   co2Serial.begin(9600);
-  //ini_CO2();
-   
+
+
+ 
 
   /* read memory EEPROM */
 
@@ -333,6 +339,8 @@ void setup()
     Serial.print(F("Adresse IP:")); Serial.println(local_ip);
     Serial.print(F("Adresse MAC:")); Serial.println(local_mac);
 
+    //dns.begin(WiFi.dnsServerIP());
+    Serial.print(F("DNS information:"));Serial.println(WiFi.dnsIP());
 
 
 
@@ -357,43 +365,75 @@ void setup()
     serverhttp.begin();
 
   /*Config Modbus IP*/
+  
     mb.config("InnoGreenTech", "innogreentech");
     mb.addIreg(HIGH_WORD);
     mb.addIreg(LOW_WORD);
 
     dht.begin();
-    //ini_CO2();
   
-    display.begin(SSD1306_SWITCHCAPVCC, 0x3C);  // initialize with the I2C addr 0x3C (for the 64x48)
+  /*initialisation of the screen*/
 
+    display.begin(SSD1306_SWITCHCAPVCC, 0x3C);  // initialize with the I2C addr 0x3C 
     display.clearDisplay();
+    display.setRotation(180);
     display.display();
 }
 
 void loop() {
   /* server control */
+  
   serverhttp.handleClient();
   mb.task();
 
+ /* Send data*/
+    
+ if (millis()>lastmessage+millisecondes and enableServer==1){send_data();} 
+
   /* read data write it on screen */
 
-  if (millis()> refreshScreen + REFRESHSCREEN )
+  if (millis()> refreshScreen + REFRESH )
       {
+        float temp=dht.readTemperature();
+        int   hum =dht.readHumidity();
+        if(temp<100)
+        {temperature = temp-5;}
+        if(hum<101)
+        {humidity = hum;}
+
+        /* use to test and configure CO2 probeµ*/
+        if(Serial.available()>0){consigne=Serial.read();Serial.read();Serial.read();}
+
+        
+
+        if (consigne=='m'){co2 = readCO2();Serial.println("Mesure CO2");consigne='m';}
+        else if (consigne=='i'){ini_CO2();Serial.println("Init auto calibaration");consigne='m';}
+        else if (consigne=='z'){zero_CO2();Serial.println("Zero calibration"),consigne='m';}
+        else if (consigne=='c') {manu_cali();Serial.println("Calibration manuel"),consigne='m';} 
+        else{co2 = readCO2();Serial.println("Mesure CO2");consigne='m';}
+
+        /* Refresch display */
+
+        
         display.clearDisplay(); 
-        display.setTextSize(1);
-        display.setTextColor(BLACK, WHITE);
-        display.setTextColor(WHITE);
-        display.setCursor(0,0);
-        display.println(WiFi.localIP());
-        temperature =float(dht.readTemperature());
-        humidity = dht.readHumidity();
-        //co2 = readCO2();
-        display.print(temperature);
-        display.println(" C");
-        display.print(humidity);
-        display.println(" %");
-        display.print(co2);
-        display.println(" ppm"); 
+
+        if (hour()<24 && hour()>=6 )
+        {
+          display.setRotation(90);
+          display.setTextSize(1);
+          display.setTextColor(BLACK, WHITE);
+          display.setTextColor(WHITE);
+          display.setCursor(0,0);
+          display.println(WiFi.localIP());
+          display.println("");
+          display.setTextSize(2);
+          display.print(temperature);
+          display.println(" C");
+          display.print(humidity);
+          display.println(" %");
+          display.print(co2);
+          display.println(" ppm");
+         } 
         display.display();
         refreshScreen=millis();      
         Serial.print(temperature);
@@ -415,15 +455,7 @@ void loop() {
         Serial.print(co2);
         Serial.println(" ppm"); 
           
-        /* use to test and configure CO2 probeµ*/
-        if (Serial.available()>0){consigne=Serial.read();}
-
-        
-
-        if (consigne=='m'){co2 = readCO2();Serial.println("Mesure CO2");consigne='m';}
-        if (consigne=='i'){ini_CO2();Serial.println("Init auto calibaration");consigne='m';}
-        if (consigne=='z'){zero_CO2();Serial.println("Zero calibration"),consigne='m';}
-        if (consigne=='c') {manu_cali();Serial.println("Calibration manuel"),consigne='m';}        
+    
         
             
       }

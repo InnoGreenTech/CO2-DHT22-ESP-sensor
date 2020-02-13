@@ -17,6 +17,9 @@ int readCO2() {
   if (response[1] != 0x86)
   {
     Serial.println("Invalid response from co2 sensor!");
+    co2Serial.flush();
+   co2Serial.end();
+   co2Serial.begin(9600);
     
     return co2;
   }

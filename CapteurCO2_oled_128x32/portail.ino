@@ -61,7 +61,7 @@ String page_handleroot(){
      
          
          page +=F("</div>");
-         page +=F("<footer><a href='http://innogreentech.fr'>InnoGreenTech</a><br/><a href='mailto: info@innnogreentech.fr'>Contactez moi</a></footer>");
+         page +=F("<footer><a href='http://www.lepal.com'>InnoGreenTech</a><br/><a href='mailto: fabricebaudin@outlook.fr'>Contactez moi</a></footer>");
          page +=F("</div></body></html>");
 
 return page;
