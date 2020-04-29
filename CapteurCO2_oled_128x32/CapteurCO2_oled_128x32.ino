@@ -110,8 +110,8 @@ unsigned long refreshScreen;      // taux de rafraîchissement de l'écran
 
 //const char* host = "esp8266-webupdate";
 const char* update_path = "/firmware";
-const char* update_username = "admin";
-const char* update_password = "admin";
+const char* update_username = "inoogreentech";
+const char* update_password = "innogreentech";
 
 ESP8266HTTPUpdateServer httpUpdater;
 

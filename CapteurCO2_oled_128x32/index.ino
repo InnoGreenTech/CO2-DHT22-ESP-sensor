@@ -15,9 +15,9 @@ void indexRoot(){
 
 
 String indexPage(){
-                    String page =F("<!DOCTYPE html> <html lang=fr-FR> <head> <meta charset='utf-8'><link rel='stylesheet'type='text/css'href='style.css'><title>Capteur Wifi</title></head>");
+                    String page =F("<!DOCTYPE html> <html lang=fr-FR><head><meta charset='utf-8'><link rel='stylesheet'type='text/css'href='style.css'><title>Solar Greenhouse</title></head>");
                            page +=F("<body>");
-                           page +=F("<nav> <ul id='menu'><li><a href='index.html'> Accueil </a></li><li><a href='reglage.html'> Réglages </a></li><li><a href='mail.html'> Mails </a> </li></ul></nav>");
+                           page +=F("<nav> <ul id='menu'><li><a href='index.html'> Accueil </a></li><li><a href='firmware'> Update </a></li</ul></nav>");
                            page +=F("<div id='page'>");
                            page +=F("<header><h1>Centrale Qualité </h1></header>");
                            page +=F("<div id='corp'>");
@@ -56,7 +56,7 @@ String indexPage(){
                            page +=F("</li><li><input type='hidden' name='envoi' value='1'/></li><li><input type='submit' value='envoi'/>");                      
                            page +=F("</form></li></ul></section>");
                            page +=F("</div>");
-                           page +=F("<footer><a href='http://www.Innogreentech.com'>InnoGreenTech</a><a href='mailto: fabricebaudin@outlook.fr'>Contactez moi</a></footer>");
+                           page +=F("<footer><a href='http://www.innogreentech.fr'>InnoGreenTech</a><a href='mailto: info@innogreentec.fr'>Contactez moi</a></footer>");
                            page +=F("</div></body></html>");                  
                            return page;
                           }
